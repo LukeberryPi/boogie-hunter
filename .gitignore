@@ -12,6 +12,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# whatsapp chat
+_chat.txt
+
 
 # environment variables
 .env

@@ -1,17 +1,378 @@
 ---
+import songsData from '../data/songs.json';
 
+const { playlists } = songsData;
+const songs = [...songsData.songs].sort((a, b) => (b.thumbnailUrl ? 1 : 0) - (a.thumbnailUrl ? 1 : 0));
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Boogie Hunter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --bg:       #070010;
+        --surface:  rgba(255,255,255,0.04);
+        --border:   rgba(255,215,0,0.18);
+        --gold:     #FFD700;
+        --pink:     #FF2D78;
+        --purple:   #9B5DE5;
+        --green:    #1ED760;
+        --red:      #FF4444;
+        --text:     #f0e6ff;
+        --muted:    #7a6a90;
+      }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(ellipse 80% 40% at 50% -10%, rgba(155,93,229,0.18) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 50% at 90% 90%, rgba(255,45,120,0.1) 0%, transparent 50%),
+          radial-gradient(ellipse 50% 40% at 10% 70%, rgba(255,215,0,0.06) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 0 1.5rem 6rem;
+      }
+
+      /* ── Header ─────────────────────────────────────────── */
+      header {
+        text-align: center;
+        padding: 5rem 0 3.5rem;
+      }
+
+      .disco {
+        font-size: 3.5rem;
+        display: block;
+        margin-bottom: 0.75rem;
+        animation: spin 12s linear infinite;
+        transform-origin: center;
+        will-change: transform;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      h1 {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: clamp(5rem, 14vw, 11rem);
+        letter-spacing: 0.04em;
+        line-height: 0.88;
+        background: linear-gradient(135deg, #FFD700 0%, #FF2D78 45%, #9B5DE5 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .tagline {
+        margin-top: 1rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+      }
+
+      .badge {
+        display: inline-block;
+        margin-top: 1.25rem;
+        padding: 0.3rem 1rem;
+        border-radius: 100px;
+        border: 1px solid rgba(255,215,0,0.3);
+        background: rgba(255,215,0,0.06);
+        color: var(--gold);
+        font-size: 0.72rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      /* ── Section heading ────────────────────────────────── */
+      .section-head {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.2rem;
+        letter-spacing: 0.12em;
+        color: var(--gold);
+        margin: 3.5rem 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .section-head::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, rgba(255,215,0,0.35), transparent);
+      }
+
+      /* ── Song grid ──────────────────────────────────────── */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 0.875rem;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255,215,0,0.45);
+        box-shadow: 0 12px 40px rgba(155,93,229,0.18), 0 0 0 1px rgba(255,215,0,0.12);
+      }
+
+      .card-thumb {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        display: block;
+        background: rgba(155,93,229,0.12);
+      }
+
+      .card-thumb-placeholder {
+        width: 100%;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, rgba(155,93,229,0.15), rgba(255,45,120,0.1));
+      }
+
+      .card-body {
+        padding: 1rem 1rem 0.875rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        flex: 1;
+      }
+
+      .card-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #fff;
+        line-height: 1.35;
+        text-transform: capitalize;
+      }
+
+      .card-artist {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-style: italic;
+        text-transform: capitalize;
+      }
+
+      .card-links {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.32rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: opacity 0.15s;
+        white-space: nowrap;
+      }
+
+      .btn:hover { opacity: 0.75; }
+
+      .btn-yt {
+        background: rgba(255,68,68,0.12);
+        color: var(--red);
+        border: 1px solid rgba(255,68,68,0.28);
+      }
+
+      .btn-sp {
+        background: rgba(30,215,96,0.1);
+        color: var(--green);
+        border: 1px solid rgba(30,215,96,0.28);
+      }
+
+      /* ── Playlist grid ──────────────────────────────────── */
+      .playlist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 0.875rem;
+      }
+
+      .playlist-card {
+        background: rgba(155,93,229,0.07);
+        border: 1px solid rgba(155,93,229,0.22);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+      }
+
+      .playlist-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(155,93,229,0.5);
+        box-shadow: 0 8px 24px rgba(155,93,229,0.15);
+      }
+
+      .playlist-thumb {
+        width: 64px;
+        height: 64px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: rgba(155,93,229,0.2);
+      }
+
+      .playlist-thumb-placeholder {
+        width: 64px;
+        height: 64px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        background: linear-gradient(135deg, rgba(155,93,229,0.2), rgba(255,45,120,0.15));
+        flex-shrink: 0;
+      }
+
+      .playlist-info { flex: 1; min-width: 0; }
+
+      .playlist-label {
+        font-size: 0.65rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--purple);
+        margin-bottom: 0.25rem;
+      }
+
+      .playlist-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .playlist-arrow {
+        color: var(--purple);
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+
+      /* ── Footer ─────────────────────────────────────────── */
+      footer {
+        text-align: center;
+        padding-top: 4rem;
+        color: var(--muted);
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="disco">🪩</span>
+        <h1>Boogie Hunter</h1>
+        <p class="tagline">The Request Line</p>
+        <span class="badge">{songs.length} songs requested</span>
+      </header>
+
+      <h2 class="section-head">Songs</h2>
+
+      <div class="grid">
+        {songs.map((song) => (
+          <div class="card">
+            {song.thumbnailUrl
+              ? <img class="card-thumb" src={song.thumbnailUrl} alt={song.title ?? song.artist ?? 'Song'} loading="lazy" />
+              : <div class="card-thumb-placeholder">🎵</div>
+            }
+            <div class="card-body">
+              <div class="card-title">{song.title ?? song.artist ?? '?'}</div>
+              {song.title && song.artist && (
+                <div class="card-artist">{song.artist}</div>
+              )}
+              <div class="card-links">
+                <a class="btn btn-yt" href={song.youtubeUrl} target="_blank" rel="noopener">
+                  ▶ YouTube
+                </a>
+                {song.spotifyUrl && (
+                  <a class="btn btn-sp" href={song.spotifyUrl} target="_blank" rel="noopener">
+                    ♫ Spotify
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {playlists.length > 0 && (
+        <>
+          <h2 class="section-head">Playlists</h2>
+          <div class="playlist-grid">
+            {playlists.map((pl) => (
+              <a class="playlist-card" href={pl.url} target="_blank" rel="noopener">
+                {pl.thumbnailUrl
+                  ? <img class="playlist-thumb" src={pl.thumbnailUrl} alt={pl.title ?? 'Playlist'} loading="lazy" />
+                  : <div class="playlist-thumb-placeholder">🎶</div>
+                }
+                <div class="playlist-info">
+                  <div class="playlist-label">Spotify Playlist</div>
+                  <div class="playlist-name">{pl.title ?? 'Playlist'}</div>
+                </div>
+                <span class="playlist-arrow">→</span>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+
+      <footer>made with 🪩 for the boogie request line</footer>
+    </div>
+  </body>
 </html>
