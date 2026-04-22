@@ -26,7 +26,9 @@ interface Output {
   playlists: Playlist[];
 }
 
-const ZERO_WIDTH = /[‎‏​⁠﻿⁣]/g;
+// \p{Cf} = Unicode "Format" category: zero-width, directional embeddings, etc.
+// WhatsApp wraps phone numbers in U+202A/202C which broke the "added +" filter.
+const ZERO_WIDTH = /\p{Cf}/gu;
 const MSG_START = /^\[(\d{2}\/\d{2}\/\d{2}, \d{2}:\d{2}:\d{2})\] ([^:]+): ([\s\S]*)/;
 
 const SYSTEM_NOISE = [
@@ -35,10 +37,11 @@ const SYSTEM_NOISE = [
   /Messages and calls are end-to-end encrypted/,
   /image omitted/,
   /video omitted/,
-  / added \+/,
+  /added \+\d/,
   /Your security code with/,
   /changed the subject/,
   /changed this group/,
+  /^\+\d[\d\s]{6,}/, // message sender IS a phone number
 ];
 
 const LINE_NOISE = [
@@ -68,6 +71,7 @@ const LINE_NOISE = [
   /^[☀️🔥🫶🏻❤️💖🇧🇷🪩🌟☎️✅🫶]+$/u,
   /^\d{1,2}\s+degrees/i,
   /^20\s+degrees/i,
+  /\+\d[\d\s]{6,}/, // phone number anywhere in line
 ];
 
 function isNoise(line: string): boolean {
