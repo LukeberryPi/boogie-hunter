@@ -3,6 +3,9 @@ import songsData from '../data/songs.json';
 
 const { playlists } = songsData;
 const songs = [...songsData.songs].sort((a, b) => (b.thumbnailUrl ? 1 : 0) - (a.thumbnailUrl ? 1 : 0));
+
+const EMOJI_RE = /[\p{Extended_Pictographic}\u{FE0F}\u{20E3}\u{200D}]+/gu;
+const clean = (s: string | null) => s?.replace(EMOJI_RE, "").trim() || null;
 ---
 
 <html lang="en">
@@ -30,7 +33,6 @@ const songs = [...songsData.songs].sort((a, b) => (b.thumbnailUrl ? 1 : 0) - (a.
         --muted:    #7a6a90;
       }
 
-      html { scroll-behavior: smooth; }
 
       body {
         background: var(--bg);
@@ -311,14 +313,64 @@ const songs = [...songsData.songs].sort((a, b) => (b.thumbnailUrl ? 1 : 0) - (a.
         font-size: 0.75rem;
         letter-spacing: 0.1em;
       }
+
+      /* ── Nav ────────────────────────────────────────────── */
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        justify-content: flex-end;
+        padding: 0.75rem 0;
+        background: linear-gradient(to bottom, rgba(7,0,16,0.95) 80%, transparent);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+
+      .nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 1.1rem;
+        border-radius: 100px;
+        background: var(--gold);
+        color: #000;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: background 0.15s, transform 0.15s;
+      }
+
+      .nav-link:hover {
+        background: #fff;
+        transform: translateY(-1px);
+      }
+
+      footer a {
+        color: var(--gold);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255,215,0,0.4);
+        transition: border-color 0.15s, color 0.15s;
+      }
+
+      footer a:hover {
+        color: #fff;
+        border-bottom-color: #fff;
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
+      <nav>
+        <a class="nav-link" href="#playlists">🎶 Playlists</a>
+      </nav>
+
       <header>
         <span class="disco">🪩</span>
         <h1>Boogie Hunter</h1>
-        <p class="tagline">The Request Line</p>
+        <p class="tagline">the boogie request line ☎️ 🪩 🌟</p>
         <span class="badge">{songs.length} songs requested</span>
       </header>
 
@@ -332,9 +384,9 @@ const songs = [...songsData.songs].sort((a, b) => (b.thumbnailUrl ? 1 : 0) - (a.
               : <div class="card-thumb-placeholder">🎵</div>
             }
             <div class="card-body">
-              <div class="card-title">{song.title ?? song.artist ?? '?'}</div>
+              <div class="card-title">{clean(song.title) ?? clean(song.artist) ?? '?'}</div>
               {song.title && song.artist && (
-                <div class="card-artist">{song.artist}</div>
+                <div class="card-artist">{clean(song.artist)}</div>
               )}
               <div class="card-links">
                 <a class="btn btn-yt" href={song.youtubeUrl} target="_blank" rel="noopener">
@@ -353,7 +405,7 @@ const songs = [...songsData.songs].sort((a, b) => (b.thumbnailUrl ? 1 : 0) - (a.
 
       {playlists.length > 0 && (
         <>
-          <h2 class="section-head">Playlists</h2>
+          <h2 id="playlists" class="section-head">Playlists</h2>
           <div class="playlist-grid">
             {playlists.map((pl) => (
               <a class="playlist-card" href={pl.url} target="_blank" rel="noopener">
@@ -372,7 +424,51 @@ const songs = [...songsData.songs].sort((a, b) => (b.thumbnailUrl ? 1 : 0) - (a.
         </>
       )}
 
-      <footer>made with 🪩 for the boogie request line</footer>
+      <footer>made with ❤️ by <a href="https://instagram.com/thebrazilianberry" target="_blank">Brazilian Berry</a></footer>
     </div>
+
+    <button id="back-to-top" aria-label="Back to top"><p>Back to top</p><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/></svg></button>
+
+    <style>
+      #back-to-top {
+        position: fixed;
+        bottom: 2rem;
+        font-family: 'DM Sans', sans-serif;
+        right: 2rem;
+        z-index: 100;
+        display: flex;
+        gap: 8px;
+        padding: 4px 8px;
+        border-radius: 8px;
+        align-items: center;
+        border: 2px solid #000;
+        background: var(--gold);
+        color: #000;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity 0.2s, transform 0.2s;
+        pointer-events: none;
+      }
+
+      #back-to-top.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      #back-to-top:hover {
+        background: #fff;
+      }
+    </style>
+
+    <script>
+      const btn = document.getElementById('back-to-top')!;
+      window.addEventListener('scroll', () => {
+        btn.classList.toggle('visible', window.scrollY > 400);
+      }, { passive: true });
+      btn.addEventListener('click', () => window.scrollTo({ top: 0 }));
+    </script>
   </body>
 </html>
