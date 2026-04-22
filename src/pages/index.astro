@@ -320,11 +320,30 @@ const clean = (s: string | null) => s?.replace(EMOJI_RE, "").trim() || null;
         top: 0;
         z-index: 50;
         display: flex;
-        justify-content: flex-end;
+        align-items: center;
+        justify-content: space-between;
         padding: 0.75rem 0;
         background: linear-gradient(to bottom, rgba(7,0,16,0.95) 80%, transparent);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
+      }
+
+      .nav-credit {
+        font-size: 0.72rem;
+        color: var(--muted);
+        letter-spacing: 0.05em;
+      }
+
+      .nav-credit a {
+        color: var(--gold);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255,215,0,0.4);
+        transition: color 0.15s, border-color 0.15s;
+      }
+
+      .nav-credit a:hover {
+        color: #fff;
+        border-bottom-color: #fff;
       }
 
       .nav-link {
@@ -364,6 +383,7 @@ const clean = (s: string | null) => s?.replace(EMOJI_RE, "").trim() || null;
   <body>
     <div class="wrap">
       <nav>
+        <span class="nav-credit">made with ❤️ by <a href="https://instagram.com/thebrazilianberry" target="_blank" rel="noopener">Brazilian Berry</a></span>
         <a class="nav-link" href="#playlists">🎶 Playlists</a>
       </nav>
 
