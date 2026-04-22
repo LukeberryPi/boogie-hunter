@@ -24,6 +24,7 @@ interface OEmbed {
 interface Output {
   songs: Song[];
   playlists: Playlist[];
+  lastUpdated: string;
 }
 
 // \p{Cf} = Unicode "Format" category: zero-width, directional embeddings, etc.
@@ -284,7 +285,7 @@ const deduped = songs.filter((s) => {
   return true;
 });
 
-const output: Output = { songs: deduped, playlists };
+const output: Output = { songs: deduped, playlists, lastUpdated: new Date().toISOString() };
 
 mkdirSync("src/data", { recursive: true });
 writeFileSync("src/data/songs.json", JSON.stringify(output, null, 2));

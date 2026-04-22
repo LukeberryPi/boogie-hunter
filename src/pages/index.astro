@@ -1,8 +1,9 @@
 ---
 import songsData from '../data/songs.json';
 
-const { playlists } = songsData;
+const { playlists, lastUpdated } = songsData;
 const songs = [...songsData.songs].sort((a, b) => (b.thumbnailUrl ? 1 : 0) - (a.thumbnailUrl ? 1 : 0));
+const updatedDate = new Date(lastUpdated).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 const EMOJI_RE = /[\p{Extended_Pictographic}\u{FE0F}\u{20E3}\u{200D}]+/gu;
 const clean = (s: string | null) => s?.replace(EMOJI_RE, "").trim() || null;
@@ -110,6 +111,14 @@ const clean = (s: string | null) => s?.replace(EMOJI_RE, "").trim() || null;
         color: var(--gold);
         font-size: 0.72rem;
         letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .last-updated {
+        margin-top: 0.6rem;
+        color: var(--muted);
+        font-size: 0.72rem;
+        letter-spacing: 0.15em;
         text-transform: uppercase;
       }
 
@@ -392,6 +401,7 @@ const clean = (s: string | null) => s?.replace(EMOJI_RE, "").trim() || null;
         <h1>Boogie Hunter</h1>
         <p class="tagline">the boogie request line ☎️ 🪩 🌟</p>
         <span class="badge">{songs.length} songs requested</span>
+        <p class="last-updated">last updated {updatedDate}</p>
       </header>
 
       <h2 class="section-head">Songs</h2>
